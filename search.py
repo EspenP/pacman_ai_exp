@@ -70,26 +70,10 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
+    util.pause()
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
-
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    """
-    "*** YOUR CODE HERE ***"
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
 
     # Initialize start state and counter
     start = problem.getStartState() # Get start position
@@ -100,19 +84,35 @@ def depthFirstSearch(problem):
     print(stack.list)
     moves_taken = [] # Holds the moves taken along a path
 
-    # # Define our recursive function
+    # Define our recursive function
     def DFS(pos):
+        print("Position ", pos)
         if problem.isGoalState(pos): # Reached the end
-            return True  # Triggers backtracking
+            print("End found")
+            return True              # Triggers end of search
         elif visited[pos] >= 1:      # Reached an already visited node
-            moves_taken.pop()
-            return False
+            if moves_taken:
+                moves_taken.pop()
+            return False             # Triggers backtracking
 
-        visited[pos] += 1            # Marked node as visited
-        successors = problem.getSuccessors(pos)
-        for x in successors:
-            moves_taken.append(game.Directions(x[1]))
-            if DFS(x):
+        visited[pos] += 1                       # Marked node as visited
+        # print("Visited nodes: ", visited)
+        print("Found new pos", pos)
+        successors = util.Stack() # Introduce new nodes to the stack
+        adjacent = problem.getSuccessors(pos)
+        for x in adjacent:
+            if visited[x] == 0:
+                successors.push(x)
+
+        while True:
+            if successors.isEmpty():
+                if moves_taken:
+                    moves_taken.pop()
+                return False # Triggers backtracking
+            print("Valid moves", successors.list)
+            move = successors.pop()
+            moves_taken.append(move[1]) # Append the direction
+            if DFS(move[0]):
                 return True
 
     if DFS(start):
@@ -122,6 +122,7 @@ def depthFirstSearch(problem):
         print("Error solving maze")
         print(moves_taken)
         return
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
