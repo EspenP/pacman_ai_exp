@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -87,7 +87,41 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+
+    # Initialize start state and counter
+    start = problem.getStartState() # Get start position
+    visited = util.Counter()  # Create a system for keeping track of visited vertices
+
+    # Initialize stack and a list of moves taken
+    stack = util.Stack()
+    print(stack.list)
+    moves_taken = [] # Holds the moves taken along a path
+
+    # # Define our recursive function
+    def DFS(pos):
+        if problem.isGoalState(pos): # Reached the end
+            return True  # Triggers backtracking
+        elif visited[pos] >= 1:      # Reached an already visited node
+            moves_taken.pop()
+            return False
+
+        visited[pos] += 1            # Marked node as visited
+        successors = problem.getSuccessors(pos)
+        for x in successors:
+            moves_taken.append(game.Directions(x[1]))
+            if DFS(x):
+                return True
+
+    if DFS(start):
+        print("Maze solved")
+        return moves_taken
+    else:
+        print("Error solving maze")
+        print(moves_taken)
+        return
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
