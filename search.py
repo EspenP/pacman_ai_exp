@@ -125,40 +125,63 @@ def depthFirstSearch(problem):
 
 
 def breadthFirstSearch(problem):
-    # Initialize start state and counter
-    visited = util.Counter()  # Create a system for keeping track of visited vertices
+    # # Does this class even work like it's supposed to?
+    # queue = util.Queue()
+    # queue.push(1)
+    # queue.push(2)
+    # queue.push(3)
+    # missing = queue.pop()
+    # print(queue.list)
+    # print(missing)
+    # util.raiseNotDefined()
 
-    # Initialize stack and a list of moves taken
-    queue = util.Queue()
-    print(queue.list)
-    shortest = [] # Store the shortest path
-    moves_taken = [] # Holds the moves taken along a path
-    node = problem.getStartState() # Get start position
-    visited[node] += 1
 
-    while True:
-        successors = problem.getSuccessors(node)
-        new_queue = util.Queue()
-        for x in successors:
-            if visited[x] != 0:
-                continue
-            new_queue.push(x[0])
+    # # Initialize start state and counter
+    # visited = util.Counter()  # Create a system for keeping track of visited vertices
 
-        if problem.isGoalState(node[0]): # If we've reached the goal state, check if the path is shortest
-            moves_taken.push_back(node[1]) # If it isn't, take that move back and go to the next one in the queue
-            if len(moves_taken) < len(shortest) or not shortest:
-                shortest = moves_taken
-            moves_taken.pop()
-        elif not new_queue:
-            moves_taken.pop()
-        else:
-            queue.push(new_queue)
+    # # Initialize queue and a list of moves taken
+    # queue = util.Queue()
+    # shortest = [] # Store the shortest path
+    # moves_taken = [] # Holds the moves taken along a path
+    # node = problem.getStartState() # Get start position
+    # direction = ""
+    # visited[node] += 1
 
-        node = queue.pop()
-        moves_taken.append(node[1])
-        visited[node] += 1
+    # while True:
+    #     # Get next set of successors
+    #     successors = problem.getSuccessors(node)
+    #     new_queue = util.Queue()
+    #     for x in successors:
+    #         if visited[x] == 0:
+    #             new_queue.push(x)
 
-    return shortest
+    #     # Evaluate position in maze
+    #     if problem.isGoalState(node): # If we've reached the goal state, check if the path is shortest
+    #         if len(moves_taken) < len(shortest) or not shortest:
+    #             shortest = moves_taken
+    #         moves_taken.pop()
+    #     elif not new_queue and moves_taken:
+    #         moves_taken.pop()
+    #     else:
+    #         queue.push(new_queue)
+
+    #     # Are we done?
+    #     if queue.isEmpty():
+    #         break
+
+    #     # Make the next move
+    #     print("Before", queue.list)
+    #     move = queue.pop()
+    #     print("After", queue.list)
+    #     print("move: ", move)
+    #     print("move.list ", move.list)
+    #     print("move.list[0] ", move.list[0])
+    #     moves_taken.append(move.list[1])
+    #     print("Current node: ", node)
+    #     # moves_taken.append(node[1])
+    #     visited[node] += 1
+
+    # return shortest
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
