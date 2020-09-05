@@ -19,6 +19,16 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+def reconstruct_path(trace, start, end):
+    solution = util.Queue() # The first added direction will be the last one pacman needs to take, since we are backtracking
+    child = end
+    while True:
+        solution.push(trace[child][1]) # Push the direction onto the queue
+        child = trace[child][0]
+        if child == start:
+            break
+    return solution.list
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -125,63 +135,39 @@ def depthFirstSearch(problem):
 
 
 def breadthFirstSearch(problem):
-    # # Does this class even work like it's supposed to?
-    # queue = util.Queue()
-    # queue.push(1)
-    # queue.push(2)
-    # queue.push(3)
-    # missing = queue.pop()
-    # print(queue.list)
-    # print(missing)
-    # util.raiseNotDefined()
+    # Initialize stuff
+    start = problem.getStartState() # Single node (x, y)
+    end = start      # Variable to hold end node
+    node = start
+    trace = {start : []}     # trace[child] = [parent_node, parent to child direction]
+    visited = util.Counter()
+    visited[node] = 1
 
+    # Explore layers until we find the goal.
+    # Keep track of parents
+    queue = util.Queue()
+    while True:
+        successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
+        for x in successors:
+            if visited[x[0]] == 0:
+                queue.push(x)   # Store a ((x, y), Direction, Cost) in queue
+                visited[x[0]] = 1
+                trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
 
-    # # Initialize start state and counter
-    # visited = util.Counter()  # Create a system for keeping track of visited vertices
+        if queue.isEmpty():
+            print("ALL NODES EXPLORED, NO SOLUTION")
+            break
+        else:
+            node = queue.pop()[0]
 
-    # # Initialize queue and a list of moves taken
-    # queue = util.Queue()
-    # shortest = [] # Store the shortest path
-    # moves_taken = [] # Holds the moves taken along a path
-    # node = problem.getStartState() # Get start position
-    # direction = ""
-    # visited[node] += 1
+        if problem.isGoalState(node):
+            end = node
+            break
+        ## END WHILE LOOP ##
 
-    # while True:
-    #     # Get next set of successors
-    #     successors = problem.getSuccessors(node)
-    #     new_queue = util.Queue()
-    #     for x in successors:
-    #         if visited[x] == 0:
-    #             new_queue.push(x)
+    # Reconstruct Path
+    return reconstruct_path(trace, start, end)
 
-    #     # Evaluate position in maze
-    #     if problem.isGoalState(node): # If we've reached the goal state, check if the path is shortest
-    #         if len(moves_taken) < len(shortest) or not shortest:
-    #             shortest = moves_taken
-    #         moves_taken.pop()
-    #     elif not new_queue and moves_taken:
-    #         moves_taken.pop()
-    #     else:
-    #         queue.push(new_queue)
-
-    #     # Are we done?
-    #     if queue.isEmpty():
-    #         break
-
-    #     # Make the next move
-    #     print("Before", queue.list)
-    #     move = queue.pop()
-    #     print("After", queue.list)
-    #     print("move: ", move)
-    #     print("move.list ", move.list)
-    #     print("move.list[0] ", move.list[0])
-    #     moves_taken.append(move.list[1])
-    #     print("Current node: ", node)
-    #     # moves_taken.append(node[1])
-    #     visited[node] += 1
-
-    # return shortest
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
