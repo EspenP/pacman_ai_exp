@@ -125,9 +125,40 @@ def depthFirstSearch(problem):
 
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Initialize start state and counter
+    visited = util.Counter()  # Create a system for keeping track of visited vertices
+
+    # Initialize stack and a list of moves taken
+    queue = util.Queue()
+    print(queue.list)
+    shortest = [] # Store the shortest path
+    moves_taken = [] # Holds the moves taken along a path
+    node = problem.getStartState() # Get start position
+    visited[node] += 1
+
+    while True:
+        successors = problem.getSuccessors(node)
+        new_queue = util.Queue()
+        for x in successors:
+            if visited[x] != 0:
+                continue
+            new_queue.push(x[0])
+
+        if problem.isGoalState(node[0]): # If we've reached the goal state, check if the path is shortest
+            moves_taken.push_back(node[1]) # If it isn't, take that move back and go to the next one in the queue
+            if len(moves_taken) < len(shortest) or not shortest:
+                shortest = moves_taken
+            moves_taken.pop()
+        elif not new_queue:
+            moves_taken.pop()
+        else:
+            queue.push(new_queue)
+
+        node = queue.pop()
+        moves_taken.append(node[1])
+        visited[node] += 1
+
+    return shortest
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
