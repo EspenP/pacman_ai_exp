@@ -136,6 +136,52 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     # Initialize stuff
+    def BFS(start):
+        end = start      # Variable to hold end node
+        node = start
+        trace = {start : []}     # trace[child] = [parent_node, parent to child direction]
+        visited = util.Counter()
+        visited[node] = 1
+
+        # Explore layers until we find the goal.
+        # Keep track of parents
+        queue = util.Queue()
+        while True:
+            successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
+            for x in successors:
+                if visited[x[0]] == 0:
+                    queue.push(x)   # Store a ((x, y), Direction, Cost) in queue
+                    visited[x[0]] = 1
+                    trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
+
+            if queue.isEmpty():
+                print("ALL NODES EXPLORED, NO SOLUTION")
+                break
+            else:
+                node = queue.pop()[0]
+
+            if problem.isGoalState(node):
+                end = node
+                break
+            ## END WHILE LOOP ##
+
+        # Reconstruct Path
+        return [reconstruct_path(trace, start, end), end]
+    # END BFS DEF
+     # Now solve a single OR multi goal problem
+    start = problem.getStartState() # Single node (x, y)
+    last_goal = BFS(start)
+    solution = last_goal[0]
+    while not problem.isGoalState(last_goal[1]):
+        print("New goal: ", last_goal[1])
+        last_goal = BFS(last_goal[1])
+        solution += last_goal[0]
+
+    return solution
+
+
+def uniformCostSearch(problem):
+    # Initialize stuff
     start = problem.getStartState() # Single node (x, y)
     end = start      # Variable to hold end node
     node = start
@@ -145,12 +191,12 @@ def breadthFirstSearch(problem):
 
     # Explore layers until we find the goal.
     # Keep track of parents
-    queue = util.Queue()
+    queue = util.PriorityQueue()
     while True:
         successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
         for x in successors:
             if visited[x[0]] == 0:
-                queue.push(x)   # Store a ((x, y), Direction, Cost) in queue
+                queue.push(x, x[2])   # Store a ((x, y), Direction, Cost) in queue
                 visited[x[0]] = 1
                 trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
 
@@ -168,12 +214,6 @@ def breadthFirstSearch(problem):
     # Reconstruct Path
     return reconstruct_path(trace, start, end)
 
-
-def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
@@ -182,9 +222,49 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Initialize stuff
+    def ASTAR(start):
+        end = start      # Variable to hold end node
+        node = start
+        trace = {start : []}     # trace[child] = [parent_node, parent to child direction]
+        visited = util.Counter()
+        visited[node] = 1
+
+        # Explore layers until we find the goal.
+        # Keep track of parents
+        queue = util.PriorityQueue()
+        while True:
+            successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
+            for x in successors:
+                if visited[x[0]] == 0:
+                    queue.push(x, heuristic(x[0], problem))   # Store a ((x, y), Direction, Cost) in queue
+                    visited[x[0]] = 1
+                    trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
+
+            if queue.isEmpty():
+                print("ALL NODES EXPLORED, NO SOLUTION")
+                return [None]
+            else:
+                node = queue.pop()[0]
+
+            if problem.isGoalState(node):
+                end = node
+                break
+            ## END WHILE LOOP ##
+
+        # Reconstruct Path
+        return [reconstruct_path(trace, start, end), end]
+    # END ASTAR DEF
+     # Now solve a single OR multi goal problem
+    start = problem.getStartState() # Single node (x, y)
+    last_goal = ASTAR(start)
+    solution = last_goal[0]
+    while not problem.isGoalState(last_goal[1]):
+        print("New goal: ", last_goal[1])
+        last_goal = ASTAR(last_goal[1])
+        solution += last_goal[0]
+
+    return solution
 
 
 # Abbreviations
