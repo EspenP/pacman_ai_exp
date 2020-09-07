@@ -303,16 +303,9 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        print("Current goals: ", self.goals)
-        print("State ", state)
-        if state in self.goals:
-            self.goals.remove(state)
-            print("Removing state from list.", self.goals)
-            return True
-        elif not self.goals:  # Tells us there are no more goals to complete
-            return True
-        else:
-            return False
+
+
+
 
     def getSuccessors(self, state):
         successors = []
@@ -320,10 +313,7 @@ class CornersProblem(search.SearchProblem):
             x,y = state
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
-                nextState = (nextx, nexty)
-                cost = self.costFn(nextState)
-                successors.append( ( nextState, action, cost) )
+            hitsWall = self.walls[nextx][nexty]
 
         self._expanded += 1 # DO NOT CHANGE
         return successors

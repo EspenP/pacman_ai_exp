@@ -136,48 +136,38 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     # Initialize stuff
-    def BFS(start):
-        end = start      # Variable to hold end node
-        node = start
-        trace = {start : []}     # trace[child] = [parent_node, parent to child direction]
-        visited = util.Counter()
-        visited[node] = 1
+    start = problem.getStartState()
+    end = start      # Variable to hold end node
+    node = start
+    trace = {start : []}     # trace[child] = [parent_node, parent to child direction]
+    visited = util.Counter()
+    visited[node] = 1
 
-        # Explore layers until we find the goal.
-        # Keep track of parents
-        queue = util.Queue()
-        while True:
-            successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
-            for x in successors:
-                if visited[x[0]] == 0:
-                    queue.push(x)   # Store a ((x, y), Direction, Cost) in queue
-                    visited[x[0]] = 1
-                    trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
+    # Explore layers until we find the goal.
+    # Keep track of parents
+    queue = util.Queue()
+    while True:
+        successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
+        for x in successors:
+            if visited[x[0]] == 0:
+                queue.push(x)   # Store a ((x, y), Direction, Cost) in queue
+                visited[x[0]] = 1
+                trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
 
-            if queue.isEmpty():
-                print("ALL NODES EXPLORED, NO SOLUTION")
-                break
-            else:
-                node = queue.pop()[0]
+        if queue.isEmpty():
+            print("ALL NODES EXPLORED, NO SOLUTION")
+            break
+        else:
+            node = queue.pop()[0]
 
-            if problem.isGoalState(node):
-                end = node
-                break
-            ## END WHILE LOOP ##
+        if problem.isGoalState(node):
+            end = node
+            break
+        ## END WHILE LOOP ##
 
-        # Reconstruct Path
-        return [reconstruct_path(trace, start, end), end]
-    # END BFS DEF
-     # Now solve a single OR multi goal problem
-    start = problem.getStartState() # Single node (x, y)
-    last_goal = BFS(start)
-    solution = last_goal[0]
-    while not problem.isGoalState(last_goal[1]):
-        print("New goal: ", last_goal[1])
-        last_goal = BFS(last_goal[1])
-        solution += last_goal[0]
+    # Reconstruct Path
+    return reconstruct_path(trace, start, end)
 
-    return solution
 
 
 def uniformCostSearch(problem):
@@ -185,7 +175,7 @@ def uniformCostSearch(problem):
     start = problem.getStartState() # Single node (x, y)
     end = start      # Variable to hold end node
     node = start
-    trace = {start : []}     # trace[child] = [parent_node, parent to child direction]
+    trace = {start : []}     # trace[child] = [parent_node, parent to child direction, cost]
     visited = util.Counter()
     visited[node] = 1
 
