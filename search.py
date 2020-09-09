@@ -96,7 +96,6 @@ def depthFirstSearch(problem):
 
     # Define our recursive function
     def DFS(pos):
-        print("Position ", pos)
         if problem.isGoalState(pos): # Reached the end
             print("End found")
             return True              # Triggers end of search
@@ -107,7 +106,6 @@ def depthFirstSearch(problem):
 
         visited[pos] += 1                       # Marked node as visited
         # print("Visited nodes: ", visited)
-        print("Found new pos", pos)
         successors = util.Stack() # Introduce new nodes to the stack
         adjacent = problem.getSuccessors(pos)
         for x in adjacent:
@@ -119,7 +117,6 @@ def depthFirstSearch(problem):
                 if moves_taken:
                     moves_taken.pop()
                 return False # Triggers backtracking
-            print("Valid moves", successors.list)
             move = successors.pop()
             moves_taken.append(move[1]) # Append the direction
             if DFS(move[0]):
@@ -174,32 +171,39 @@ def uniformCostSearch(problem):
     # Initialize stuff
     start = problem.getStartState() # Single node (x, y)
     end = start      # Variable to hold end node
-    node = start
-    trace = {start : []}     # trace[child] = [parent_node, parent to child direction, cost]
     visited = util.Counter()
-    visited[node] = 1
 
-    # Explore layers until we find the goal.
-    # Keep track of parents
     queue = util.PriorityQueue()
-    while True:
-        successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
-        for x in successors:
-            if visited[x[0]] == 0:
-                queue.push(x, x[2])   # Store a ((x, y), Direction, Cost) in queue
-                visited[x[0]] = 1
-                trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
-
-        if queue.isEmpty():
-            print("ALL NODES EXPLORED, NO SOLUTION")
-            break
-        else:
-            node = queue.pop()[0]
+    queue.push((start, []), 0)
+    trace = {start : [None, None, 0]}     # trace[child] = [parent_node, parent to child direction, path_cost]
+    PARENT, DIRECTION, COST = (0, 1, 2)
+    while not queue.isEmpty():
+        node, direction = queue.pop()
+        if visited[node]:
+            continue
+        visited[node] = 1
+        path_cost = trace[node][COST]
 
         if problem.isGoalState(node):
             end = node
             break
-        ## END WHILE LOOP ##
+
+        successors = problem.getSuccessors(node)
+        for s in successors:
+            s_node, s_direction, s_cost = s
+            # print(s_node, s_direction, s_cost)
+            step_cost = path_cost + s_cost
+
+            # Is the cost for the path to this location less than another existing path?
+            if s_node in trace and trace[s_node][COST] <= step_cost:
+                continue
+            elif s_node in trace:
+                queue.update((s_node, s_direction), step_cost)
+            else:
+                queue.update((s_node, s_direction), step_cost)
+            trace[s_node] = [node, s_direction, step_cost]
+
+
 
     # Reconstruct Path
     return reconstruct_path(trace, start, end)
@@ -212,49 +216,44 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    # Initialize stuff
-    def ASTAR(start):
-        end = start      # Variable to hold end node
-        node = start
-        trace = {start : []}     # trace[child] = [parent_node, parent to child direction]
-        visited = util.Counter()
-        visited[node] = 1
-
-        # Explore layers until we find the goal.
-        # Keep track of parents
-        queue = util.PriorityQueue()
-        while True:
-            successors = problem.getSuccessors(node) # List of lists [((x, y), Direction, Cost)...]
-            for x in successors:
-                if visited[x[0]] == 0:
-                    queue.push(x, heuristic(x[0], problem))   # Store a ((x, y), Direction, Cost) in queue
-                    visited[x[0]] = 1
-                    trace[x[0]] = [node, x[1]] # Store [parent_node, parent to child direction]
-
-            if queue.isEmpty():
-                print("ALL NODES EXPLORED, NO SOLUTION")
-                return [None]
-            else:
-                node = queue.pop()[0]
-
-            if problem.isGoalState(node):
-                end = node
-                break
-            ## END WHILE LOOP ##
-
-        # Reconstruct Path
-        return [reconstruct_path(trace, start, end), end]
-    # END ASTAR DEF
-     # Now solve a single OR multi goal problem
+     # Initialize stuff
     start = problem.getStartState() # Single node (x, y)
-    last_goal = ASTAR(start)
-    solution = last_goal[0]
-    while not problem.isGoalState(last_goal[1]):
-        print("New goal: ", last_goal[1])
-        last_goal = ASTAR(last_goal[1])
-        solution += last_goal[0]
+    end = start      # Variable to hold end node
+    visited = util.Counter()
 
-    return solution
+    queue = util.PriorityQueue()
+    queue.push((start, []), heuristic(start, problem))
+    trace = {start : [None, None, 0]}     # trace[child] = [PARENT, NODE, COST]
+    PARENT, DIRECTION, COST = (0, 1, 2)
+    while not queue.isEmpty():
+        node, direction = queue.pop()
+        if visited[node]:
+            continue
+        visited[node] = 1
+        path_cost = trace[node][COST]
+
+        if problem.isGoalState(node):
+            end = node
+            break
+
+        successors = problem.getSuccessors(node)
+        for s in successors:
+            s_node, s_direction, s_cost = s
+            # print(s_node, s_direction, s_cost)
+            step_cost = path_cost + s_cost
+
+            # Is the cost for the path to this location less than another existing path?
+            if s_node in trace and trace[s_node][COST] <= step_cost:
+                continue
+            elif s_node in trace:
+                queue.update((s_node, s_direction), step_cost  + heuristic(s_node, problem))
+            else:
+                queue.update((s_node, s_direction), step_cost + heuristic(s_node, problem))
+            trace[s_node] = [node, s_direction, step_cost]
+
+    # Reconstruct Path
+    return reconstruct_path(trace, start, end)
+
 
 
 # Abbreviations
