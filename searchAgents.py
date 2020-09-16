@@ -278,7 +278,7 @@ class CornersProblem(search.SearchProblem):
         Stores the walls, pacman's starting position and corners.
         """
         self.walls = startingGameState.getWalls()
-        self.startingPosition = startingGameState.getPacmanPosition()
+        self.startingPosition = (startingGameState.getPacmanPosition(), ())
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
         for corner in self.corners:
@@ -287,10 +287,7 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
         # Please add any code here which you would like to use
         # in initializing the problem
-        self.goals = []
-        for x in self.corners:
-            self.goals.append(x)
-        self.costFn = lambda x: 1
+        self.startingGameState = startingGameState
 
     def getStartState(self):
         """
@@ -303,20 +300,49 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
-
-
-
+        if len(self.corners) == len(state[1]):
+            return True
+        return False
 
     def getSuccessors(self, state):
+        """
+        Returns successor states, the actions they require, and a cost of 1.
+         As noted in search.py:
+            For a given state, this should return a list of triples, (successor,
+            action, stepCost), where 'successor' is a successor to the current
+            state, 'action' is the action required to get there, and 'stepCost'
+            is the incremental cost of expanding to that successor
+        """
+
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            x,y = state
+            # Add a successor state to the successor list if the action is legal
+            # Here's a code snippet for figuring out whether a new position hits a wall:
+            #   x,y = currentPosition
+            #   dx, dy = Actions.directionToVector(action)
+            #   nextx, nexty = int(x + dx), int(y + dy)
+            #   hitsWall = self.walls[nextx][nexty]
+            "*** YOUR CODE HERE ***"
+            x,y = state[0]
+            corners_visited = state[1]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
 
+            if not hitsWall:
+                next_node = (nextx, nexty)
+                if next_node in self.corners and next_node not in corners_visited:
+                    corners_visited += (next_node,)
+                successors.append(((next_node, corners_visited), action, 1))
+
+
+        # Bookkeeping for display purposes
         self._expanded += 1 # DO NOT CHANGE
+
         return successors
+
+
+
 
     def getCostOfActions(self, actions):
         """
@@ -324,7 +350,7 @@ class CornersProblem(search.SearchProblem):
         include an illegal move, return 999999.  This is implemented for you.
         """
         if actions == None: return 999999
-        x,y= self.startingPosition
+        x,y= self.startingPosition[0]
         for action in actions:
             dx, dy = Actions.directionToVector(action)
             x, y = int(x + dx), int(y + dy)
@@ -345,17 +371,21 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = problem.goals # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-    shortest = 0
+    corners = problem.corners
+    x,y = state[0]
+    longest = 0
     from math import sqrt
 
-    for x in corners:
-        distance = sqrt(pow((state[0] - x[0]),2) + pow((state[1] - x[1]), 2))
-        if distance < shortest or not shortest:
-            shortest = distance
+    for c in corners:
+        if c in state[1]:
+            continue
+        # distance = sqrt(pow((x - c[0]),2) + pow((y - c[1]), 2))
+        distance = mazeDistance(c, state[0], problem.startingGameState)
+        if distance > longest or not longest:
+            longest = distance
 
-    return shortest
+    return longest
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -448,8 +478,18 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    foodPos = []
+    for i,y in enumerate(foodGrid):
+        for j,x in enumerate(y):
+            if x == True:
+                foodPos.append((i,j))
+    longest = 0
+    for snack in foodPos:
+        distance = mazeDistance(position, snack, problem.startingGameState)
+        if distance > longest:
+            longest = distance
+
+    return longest
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
